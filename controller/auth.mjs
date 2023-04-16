@@ -2,6 +2,9 @@ import { userModel } from "../model/user.mjs";
 import bcrypt from 'bcrypt';
 import Jwt from "jsonwebtoken";
 
+
+const SecretToken = 'hamzaWeb';
+
 const handleSigninUser = async (req, res) => {
     try {
         const { first_name, last_name, contact, email, password } = await req.body;
@@ -23,6 +26,7 @@ const handleSigninUser = async (req, res) => {
                     })
                     if (createUser) {
                         console.log(createUser)
+                        const token = await Jwt.sign({})
                         res.status(201).send({ message: 'User is Created' })
                     }
                 }
