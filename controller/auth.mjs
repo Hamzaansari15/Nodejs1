@@ -1,27 +1,49 @@
 import { userModel } from "../model/user.mjs";
 import bcrypt from 'bcrypt';
-import Jwt  from "jsonwebtoken";
+import Jwt from "jsonwebtoken";
 
 const handleSigninUser = async (req, res) => {
-    const { first_name, last_name, email, contact, password } = await req.body;
-    const allUser = await userModel.findOne({ email: email })
-    if (allUser) return res.status(401).send({ message: 'User already exist' })
     try {
-        const hashPassword = await bcrypt.hash(password, 10)
-        const userData = await userModel.create({
-            first_name: first_name,
-            last_name: last_name,
-            contact: contact,
-            password: hashPassword,
-            email: email
-        })
-        res.status(201).send({ message: 'User is Created', id: userData._id })
+        const { first_name, last_name, contact, email, password } = await req.body;
+        const user = await userModel.findOne({ email: email })
+        if (user) {
+            res.status(400).send({ message: 'User already exists' });
+            return;
+        }
+        try {
+            if (first_name && last_name && email && contact && password) {
+                const hashPassword = await bcrypt.hash(password, 10)
+                if (hashPassword) {
+                    const createUser = await userModel.create({
+                        first_name: first_name,
+                        last_name: last_name,
+                        email: email,
+                        contact: contact,
+                        password: hashPassword
+                    })
+                    if (createUser) {
+                        console.log(createUser)
+                        res.status(201).send({ message: 'User is Created' })
+                    }
+                }
+
+            }
+            else {
+                console.log('jjj')
+                res.send({ message: 'required field is empty' })
+            }
+        }
+        catch(secondError){
+            console.log(secondError)
+            res.status(500).send({message: 'Server Error 2'})
+        }
     }
-    catch(error){
+    catch (error) {
         console.log(error)
-        res.status(500).send('Server Error')
+        res.status(500).send({ message: 'Server Error' })
     }
-    
+
+
 }
 
 
